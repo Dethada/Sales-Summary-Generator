@@ -12,7 +12,10 @@ Class: DISM/FT/1A/21
 5 for payment
 16s execution time
 '''
+
+''' Stores data reguarding the purchase records '''
 class Report():
+    # takes in list of parsed purchase records as param 
     def __init__(self, data):
         self.data = data
         self.cities = set()
