@@ -1,6 +1,6 @@
 # Sales Summary Generator
 
-V1.0 Complete
+Add Comments
 
 ![](images/purchases.png)
 

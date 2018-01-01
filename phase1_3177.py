@@ -8,16 +8,18 @@ from heapq import nlargest, nsmallest
 3 for category
 4 for sales
 5 for payment
-35s execution time
+16s execution time
 '''
 class Report():
     def __init__(self, data):
         self.data = data
         self.cities = set()
         self.categories = set()
-        for i in data:
-            self.cities.add(i[2]) # get all cities
-            self.categories.add(i[3]) # get all categories
+        for i in self.data:
+            if i[2] not in self.cities:
+                self.cities.add(i[2]) # get all cities
+            if i[3] not in self.categories:
+                self.categories.add(i[3]) # get all categories
         self.citySales = {}
         self.catSales = {}
         for city in self.cities:
@@ -34,11 +36,15 @@ class Report():
         if os.path.exists('reports'):
             shutil.rmtree('reports')
         os.makedirs('reports')
+        output = {}
         for city in self.cities:
+            output[city] = [] # initalize output dict
+        for line in self.data:
+            output.get(line[2]).append('\t'.join(line)) # add values to output dict
+        for city, lines in output.items():
             with open('reports/'+city+'.txt', 'w') as f:
-                for line in self.data:
-                    if line[2] == city:
-                        f.write('\t'.join(line))
+                for line in lines:
+                    f.write(line)
 
     def getTotalSale(self):
         total = 0
