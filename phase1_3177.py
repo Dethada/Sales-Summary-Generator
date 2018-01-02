@@ -15,7 +15,8 @@ Class: DISM/FT/1A/21
 
 ''' Stores data reguarding the purchase records '''
 class Report():
-    # takes in list of parsed purchase records as param 
+    ''' takes in list of parsed purchase records as param 
+    initalizes the Report object '''
     def __init__(self, data):
         self.data = data
         self.cities = set()
@@ -42,8 +43,9 @@ class Report():
         self.avgCatSale = self.totalSale / self.noCats
 
     '''reference: https://stackoverflow.com/questions/273192/how-can-i-create-a-directory-if-it-does-not-exist
-    https://stackoverflow.com/questions/6996603/how-to-delete-a-file-or-folder'''
-    def writeReports(self):
+    https://stackoverflow.com/questions/6996603/how-to-delete-a-file-or-folder
+    Writes indivial city purchase records out to disk'''
+    def writeRecords(self):
         if os.path.exists('reports'):
             shutil.rmtree('reports')
         os.makedirs('reports')
@@ -112,5 +114,5 @@ if __name__== "__main__":
 
     report = Report(parsedContent)
     report.printSummary()
-    report.writeReports()
+    report.writeRecords()
     print(datetime.datetime.now().strftime("%A %b %d %X"))
