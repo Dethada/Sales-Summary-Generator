@@ -1,6 +1,8 @@
 # Sales Summary Generator
 
-Check for file extension
+Run phase1_3177.py
+
+`Usage: ./phase1_3177.py <sales data file>`
 
 ![](images/purchases.png)
 
