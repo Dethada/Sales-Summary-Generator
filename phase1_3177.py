@@ -17,17 +17,18 @@ if len(sys.argv) != 2:
     print('Usage: {} <sales data file>'.format(sys.argv[0]))
     sys.exit()
 try:
-    f = open(sys.argv[1], 'r')
+    with open(sys.argv[1], 'r') as f:
+        content = f.readlines()
 except FileNotFoundError:
     print("Invalid data file. Operation aborted.")
-    sys.exit()
 else:
-    print(datetime.datetime.now().strftime("%A %b %d %X"))
-    content = f.readlines()
-    f.close()
-    parsedContent = [line.split("\t") for line in content]
+    parsedContent = parsePurchaseRecords(content)
+    if parsedContent == None:
+        print("Invalid data file. Operation aborted.")
+        sys.exit()
 
-report = Report(parsedContent)
-report.printSummary()
-report.writeRecords()
-print(datetime.datetime.now().strftime("%A %b %d %X"))
+    print(datetime.datetime.now().strftime("%A %b %d %X"))
+    report = Report(parsedContent)
+    report.printSummary()
+    report.writeRecords()
+    print(datetime.datetime.now().strftime("%A %b %d %X"))

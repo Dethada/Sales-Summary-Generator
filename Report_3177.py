@@ -11,6 +11,17 @@ Class: DISM/FT/1A/21
 5 for payment
 '''
 
+''' takes in list of lines in purchase records
+returns list of list of elements in each line
+returns None if purchase records is in invalid format'''
+def parsePurchaseRecords(content):
+    tmp = [line.split("\t") for line in content]
+    # input file format validation
+    for line in tmp:
+        if len(line) != 6:
+            return None
+    return tmp
+
 ''' Stores data reguarding the purchase records '''
 class Report():
     ''' takes in list of parsed purchase records as param 
