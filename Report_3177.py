@@ -11,44 +11,27 @@ Class: DISM/FT/1A/21
 5 for payment
 '''
 
-''' takes in list of lines in purchase records
-returns list of list of elements in each line
-returns None if purchase records is in invalid format'''
-def parsePurchaseRecords(content):
-    tmp = [line.split("\t") for line in content]
-    # input file format validation
-    for line in tmp:
-        if len(line) != 6:
-            return None
-    return tmp
-
 ''' Stores data reguarding the purchase records '''
 class Report():
     ''' takes in list of parsed purchase records as param 
     initalizes the Report object '''
     def __init__(self, data):
         self.data = data
-        self.cities = set()
-        self.categories = set()
         self.citySales = {}
         self.catSales = {}
         self.totalSale = 0
         for line in self.data:
             self.totalSale += float(line[4])
-            if line[2] not in self.cities:
-                self.cities.add(line[2]) # get all cities
-            if line[3] not in self.categories:
-                self.categories.add(line[3]) # get all categories
-        for city in self.cities:
-            self.citySales[city] = 0 # initalize citySales dict
-        for cat in self.categories:
-            self.catSales[cat] = 0 # initalize catSales dict
+            if line[2] not in self.citySales:
+                self.citySales[line[2]] = 0 # get all cities
+            if line[3] not in self.catSales:
+                self.catSales[line[3]] = 0 # get all categories
         for line in self.data:
             self.citySales[line[2]] += float(line[4]) # add sales value to city dict
             self.catSales[line[3]] += float(line[4]) # add sales value to cat dict
-        self.noCities = len(self.cities)
+        self.noCities = len(self.citySales)
         self.avgCitySale = self.totalSale / self.noCities
-        self.noCats = len(self.categories)
+        self.noCats = len(self.catSales)
         self.avgCatSale = self.totalSale / self.noCats
 
     '''reference: https://stackoverflow.com/questions/273192/how-can-i-create-a-directory-if-it-does-not-exist
@@ -59,7 +42,7 @@ class Report():
             shutil.rmtree('reports')
         os.makedirs('reports')
         output = {}
-        for city in self.cities:
+        for city in self.citySales:
             output[city] = [] # initalize output dict
         for line in self.data:
             output.get(line[2]).append('\t'.join(line)) # add values to output dict
