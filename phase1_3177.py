@@ -31,20 +31,20 @@ def writeRecords(citySales, ogfp):
         fp.close()
 
 '''reference: https://www.w3resource.com/python-exercises/dictionary/python-data-type-dictionary-exercise-22.php
-takes in a dictonary as parameter
+takes in a dictonary and n as parameter where n is number of top values
 returns top three keys with values from dict'''
-def getTopThree(dictionary):
-    topThree = nlargest(3, dictionary, key=dictionary.get) # get 3 keys with highest values
-    for i in range(3):
+def getTop(dictionary, n):
+    topThree = nlargest(n, dictionary, key=dictionary.get) # get n keys with highest values
+    for i in range(n):
         topThree[i] = '{:<23}{:23.2f}'.format(topThree[i], dictionary[topThree[i]])
     return topThree
 
-''' takes in a dictonary as parameter
+''' takes in a dictonary and n as parameter where n is number of top values
 returns bottom three keys with values from dict '''
-def getBottomThree(dictionary):
-    btmThree = nsmallest(3, dictionary, key=dictionary.get) # get 3 keys with lowest values
+def getBottom(dictionary, n):
+    btmThree = nsmallest(n, dictionary, key=dictionary.get) # get n keys with lowest values
     btmThree.reverse()
-    for i in range(3):
+    for i in range(n):
         btmThree[i] = '{:<23}{:23.2f}'.format(btmThree[i], dictionary[btmThree[i]])
     return btmThree
 
@@ -58,22 +58,32 @@ def printSummary(citySales, catSales, totalSale):
     avgCatSale = totalSale / noCats
     print("Total Sales of the year is {:.2f}\n".format(totalSale))
     print("The Average Sales From {} Cities:\n{:46.2f}\n".format(noCities, avgCitySale))
-    print("Top Three Cities\n{}".format('=' * 46))
-    for city in getTopThree(citySales):
-        print(city)
-    print('=' * 46 + '\n')
-    print("Bottom Three Cities\n{}".format('=' * 46))
-    for city in getBottomThree(citySales):
-        print(city)
+    if noCities > 3:
+        print("Top Three Cities\n{}".format('=' * 46))
+        for city in getTop(citySales, 3):
+            print(city)
+        print('=' * 46 + '\n')
+        print("Bottom Three Cities\n{}".format('=' * 46))
+        for city in getBottom(citySales, 3):
+            print(city)
+    else:
+        print("Sales Figures by Cities\n{}".format('=' * 46))
+        for city in getTop(citySales, noCities):
+            print(city)
     print('=' * 46 + '\n')
     print("The Average Sales From {} Item Categories:\n{:46.2f}\n".format(noCats, avgCatSale))
-    print("Top Three Item Categories\n{}".format('=' * 46))
-    for cat in getTopThree(catSales):
-        print(cat)
-    print('=' * 46 + '\n')
-    print("Bottom Three Item Categories\n{}".format('=' * 46))
-    for cat in getBottomThree(catSales):
-        print(cat)
+    if noCats > 3:
+        print("Top Three Item Categories\n{}".format('=' * 46))
+        for cat in getTop(catSales, 3):
+            print(cat)
+        print('=' * 46 + '\n')
+        print("Bottom Three Item Categories\n{}".format('=' * 46))
+        for cat in getBottom(catSales, 3):
+            print(cat)
+    else:
+        print("Sales Figures by Item Categories\n{}".format('=' * 46))
+        for cat in getTop(catSales, noCats):
+            print(cat)
     print('=' * 46 + '\n')
 
 def main():
@@ -111,9 +121,6 @@ def main():
             else:
                 catSales[tmp[3]] += salesAmt # calculate city sales amount
             line = f.readline()
-        if len(citySales) < 3 or len(catSales) < 3: # exit if there are not enough valid data in file
-            print("Invalid data file. Operation aborted.")
-            return
 
         printSummary(citySales, catSales, totalSale)
         f.seek(0, 0) # reset filepointer
