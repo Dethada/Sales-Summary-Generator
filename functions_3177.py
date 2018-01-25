@@ -6,47 +6,27 @@ Author: David Zhu (P1703177)
 Class: DISM/FT/1A/21
 '''
 
+''' Raise this exception when the file has a invalid format '''
 class InvalidFormat(Exception):
     def __init__(self, code):
         self.code = code
     def __str__(self):
-        return repr(self.code)
+        if self.code == 1:
+            return "Invalid number of columns"
+        elif self.code == 2:
+            return "Invalid sales value"
+        else:
+            return repr(self.code)
 
 ''' takes in a single split line returns the sales value of the line
-returns none if no valid float value is found or line format is wrong'''
+raises InvalidFormat exception when the line has a invalid format'''
 def lineValidation(splitline):
-    if len(splitline) != 6: # skip line if it has invalid format
+    if len(splitline) != 6:
         raise InvalidFormat(1)
     try:
         return float(splitline[4])
-    except ValueError: # skip line if it has invalid data
+    except ValueError:
         raise InvalidFormat(2)
-
-'''reference: https://stackoverflow.com/questions/273192/how-can-i-create-a-directory-if-it-does-not-exist
-https://stackoverflow.com/questions/6996603/how-to-delete-a-file-or-folder
-Takes in file pointer as parameter
-Writes indivial city purchase records out to disk'''
-def writeRecords(fp):
-    cityFiles = {}
-    folder = 'reports'
-    if path.exists(folder):
-        rmtree(folder) # empty and remove directory if directory already exisits
-    makedirs(folder) # create reports directory
-    for line in fp:
-        tmp = line.split("\t")
-        try:
-            lineValidation(tmp) # skip line if it has invalid format
-        except InvalidFormat:
-            continue
-        try:
-            cityFiles.get(tmp[2]).write(line)
-        except AttributeError:
-            cityfp = open('{}/{}.txt'.format(folder, tmp[2]), 'w')
-            cityfp.write(line)
-            cityFiles[tmp[2]] = cityfp
-    for f in cityFiles.values(): # close file pointers
-        f.close()
-    print('records done')
 
 '''reference: https://www.w3resource.com/python-exercises/dictionary/python-data-type-dictionary-exercise-22.php
 takes in a dictonary and n as parameter where n is number of top values
@@ -105,18 +85,30 @@ def printSummary(citySales, catSales, totalSale):
     print('{}\n'.format(divider))
 
 ''' takes in a filepointer as parameter
+writes purchase records to coresponding files
 prints summary of the purchases records'''
-def getSummary(fp):
-    citySales, catSales = {}, {}
+def parsePurchases(fp):
+    citySales, catSales, cityFiles = {}, {}, {}
+    folder = 'reports'
     totalSale = 0
+    if path.exists(folder):
+        rmtree(folder) # empty and remove directory if directory already exisits
+    makedirs(folder) # create reports directory
+    getCityFP = cityFiles.get
     for line in fp:
         splitline = line.split("\t")
         try:
             salesAmt = lineValidation(splitline)
         except InvalidFormat:
             continue
-        totalSale += salesAmt # calculate total sales amount
         city, cat = splitline[2], splitline[3]
+        try:
+            cityFiles[city].write(line)
+        except KeyError:
+            cityfp = open('{}/{}.txt'.format(folder, city), 'w')
+            cityfp.write(line)
+            cityFiles[city] = cityfp
+        totalSale += salesAmt # calculate total sales amount
         try:
             citySales[city] += salesAmt # calculate city sales amount
         except KeyError:
@@ -125,4 +117,6 @@ def getSummary(fp):
             catSales[cat] += salesAmt # calculate category sales amount
         except KeyError:
             catSales[cat] = salesAmt # add category to dictionary
+    for f in cityFiles.values(): # close all filepointers
+        f.close()
     printSummary(citySales, catSales, totalSale)
