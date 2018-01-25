@@ -94,7 +94,6 @@ def parsePurchases(fp):
     if path.exists(folder):
         rmtree(folder) # empty and remove directory if directory already exisits
     makedirs(folder) # create reports directory
-    getCityFP = cityFiles.get
     for line in fp:
         splitline = line.split("\t")
         try:
