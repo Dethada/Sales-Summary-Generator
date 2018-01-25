@@ -6,15 +6,21 @@ Author: David Zhu (P1703177)
 Class: DISM/FT/1A/21
 '''
 
+class InvalidFormat(Exception):
+    def __init__(self, code):
+        self.code = code
+    def __str__(self):
+        return repr(self.code)
+
 ''' takes in a single split line returns the sales value of the line
 returns none if no valid float value is found or line format is wrong'''
 def lineValidation(splitline):
     if len(splitline) != 6: # skip line if it has invalid format
-        return None
+        raise InvalidFormat(1)
     try:
         return float(splitline[4])
     except ValueError: # skip line if it has invalid data
-        return None
+        raise InvalidFormat(2)
 
 '''reference: https://stackoverflow.com/questions/273192/how-can-i-create-a-directory-if-it-does-not-exist
 https://stackoverflow.com/questions/6996603/how-to-delete-a-file-or-folder
@@ -26,24 +32,21 @@ def writeRecords(fp):
     if path.exists(folder):
         rmtree(folder) # empty and remove directory if directory already exisits
     makedirs(folder) # create reports directory
-    fpReadline = fp.readline
-    line = fpReadline()
-    while line:
+    for line in fp:
         tmp = line.split("\t")
-        if lineValidation(tmp) == None: # skip line if it has invalid format
-            line = fpReadline()
+        try:
+            lineValidation(tmp) # skip line if it has invalid format
+        except InvalidFormat:
             continue
-        city = tmp[2]
-        tmp = cityFiles.get(city) # try to get filepointer for city
-        if tmp == None: # if filepointer is not yet opened and stored
-            tmp = open('{}/{}.txt'.format(folder, city), 'w')
-            tmp.write(line)
-            cityFiles[city] = tmp
-        else:
-            tmp.write(line)
-        line = fpReadline()
+        try:
+            cityFiles.get(tmp[2]).write(line)
+        except AttributeError:
+            cityfp = open('{}/{}.txt'.format(folder, tmp[2]), 'w')
+            cityfp.write(line)
+            cityFiles[tmp[2]] = cityfp
     for f in cityFiles.values(): # close file pointers
         f.close()
+    print('records done')
 
 '''reference: https://www.w3resource.com/python-exercises/dictionary/python-data-type-dictionary-exercise-22.php
 takes in a dictonary and n as parameter where n is number of top values
@@ -105,15 +108,12 @@ def printSummary(citySales, catSales, totalSale):
 prints summary of the purchases records'''
 def getSummary(fp):
     citySales, catSales = {}, {}
-    catGet = catSales.get
-    fgetline = fp.readline
     totalSale = 0
-    line = fgetline()
-    while line:
+    for line in fp:
         splitline = line.split("\t")
-        salesAmt = lineValidation(splitline)
-        if salesAmt == None: # skip line if validation failed
-            line = fgetline()
+        try:
+            salesAmt = lineValidation(splitline)
+        except InvalidFormat:
             continue
         totalSale += salesAmt # calculate total sales amount
         city, cat = splitline[2], splitline[3]
@@ -125,5 +125,4 @@ def getSummary(fp):
             catSales[cat] += salesAmt # calculate category sales amount
         except KeyError:
             catSales[cat] = salesAmt # add category to dictionary
-        line = fgetline()
     printSummary(citySales, catSales, totalSale)
